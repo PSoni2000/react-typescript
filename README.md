@@ -1,46 +1,108 @@
-# Getting Started with Create React App
+# Notes -
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## typescript project setup-
 
-## Available Scripts
+```
+npx create-react-app <app-name> --template typescript
+```
 
-In the project directory, you can run:
+### run typescript project
 
-### `npm start`
+```
+npm start
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Working with typescript -
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### Creating React functions components (React.FC) -
 
-### `npm test`
+```
+import React from 'react';
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+const Todos: React.FC<{items: string[]}> = () => {
+  return (
+   ...
+  );
+};
 
-### `npm run build`
+export default Todos;
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+React.FC makes it clear that this here is a function that acts as a functional components.
+to add our custom type we use `< >`.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+**to make items optional we can add '?'**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+import React from 'react';
 
-### `npm run eject`
+const Todos: React.FC<{items?: string[]}> = () => {
+  return (
+   ...
+  );
+};
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+export default Todos;
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### React.FormEvent -
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+when working with react forms **onSubmit()**, we can use React.FormEvent -
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```
+const NewTodo = () =>{
+    const submitHandler = (event: React.FormEvent) => {
+        event.preventDefault();
+        ...
+    };
 
-## Learn More
+    return(
+        <form onSubmit={submitHandler}>
+            <label htmlFor='text'>Todo text</label>
+            <input type='text' id='text'/>
+            <button>Add Todo</button>
+        </form>
+    )
+}
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+for **onClick()** we have **React.MouseEvent**
+for **onSubmit()** we have **React.FormEvent**
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### using ref() with typescript -
+
+in normal react project ref() don't give us any error because we don't have extra types there but in case of typescript we need to add type according to whichever component ref() is going to point.
+
+```
+const NewTodo: React.FC = () => {
+  const todoTextInputRef = useRef<HTMLInputElement>(null);
+
+  const submitHandler = (event: React.FormEvent) => {
+    event.preventDefault();
+    const enteredText = todoTextInputRef.current!.value;
+    ...
+  };
+
+  return (
+    <form onSubmit={submitHandler}>
+      <label htmlFor='text'>Todo text</label>
+      <input type='text' id='text' ref={todoTextInputRef} />
+      <button>Add Todo</button>
+    </form>
+  );
+};
+```
+
+for input it will be **HTMLInputElement**
+for button it will be **HTMLButtonElement**
+for paragraph it will be **HTMLParagraphElement**
+
+**with typescript we also need to specify initial value so we have to use null in useRef()**
+
+**`!.` means we are certain that here we won't be dealing with null so therefore, drill into this object, and give the actual stored non-null value.**
+
+### Managing State & Typescript -
+
+```
+const [todos, setTodos] = useState<Todo[]>([])
+```
