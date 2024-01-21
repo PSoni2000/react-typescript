@@ -101,8 +101,110 @@ for paragraph it will be **HTMLParagraphElement**
 
 **`!.` means we are certain that here we won't be dealing with null so therefore, drill into this object, and give the actual stored non-null value.**
 
-### Managing State & Typescript -
+### Managing State & TypeScript -
 
 ```
 const [todos, setTodos] = useState<Todo[]>([])
+```
+
+### useContext() with TypeScript
+
+#### Creating context -
+
+```
+// JavaScript syntax -
+// const contextName = React.createContext(<InitialValue>)
+
+// TypeScript syntax -
+
+type TodosContextObj = {
+  items: Todo[];
+  addTodo: (text: string) => void;
+  removeTodo: (id: string) => void;
+};
+
+export const TodosContext = React.createContext<TodosContextObj>({
+  items: [],
+  addTodo: () => {},
+  removeTodo: (id: string) => {},
+});
+```
+
+#### Passing context to children components
+
+```
+const TodosContextProvider: React.FC = (props) => {
+  const [todos, setTodos] = useState<Todo[]>([]);
+
+  const addTodoHandler = (todoText: string) => {
+    const newTodo = new Todo(todoText);
+
+    setTodos((prevTodos) => {
+      return prevTodos.concat(newTodo);
+    });
+  };
+
+  const removeTodoHandler = (todoId: string) => {
+    setTodos((prevTodos) => {
+      return prevTodos.filter((todo) => todo.id !== todoId);
+    });
+  };
+
+  const contextValue: TodosContextObj = { // adding TodosContextObj type
+    items: todos,
+    addTodo: addTodoHandler,
+    removeTodo: removeTodoHandler,
+  };
+
+  return (
+    <TodosContext.Provider value={contextValue}>
+      {props.children}
+    </TodosContext.Provider>
+  );
+};
+```
+
+#### Accessing context -
+
+```
+const Todos: React.FC = () => {
+  const todosCtx = useContext(TodosContext);
+
+  return (
+    <ul className={classes.todos}>
+      {todosCtx.items.map((item) => (
+        <TodoItem
+          key={item.id}
+          text={item.text}
+          onRemoveTodo={todosCtx.removeTodo.bind(null, item.id)}
+        />
+      ))}
+    </ul>
+  );
+};
+```
+
+## tsconfig.json
+
+```
+{
+	"compilerOptions": {
+		"target": "es5", // code will be transformed in this javascript version
+		"lib": ["dom", "dom.iterable", "esnext"], // types known out of the box by our Typescript code.
+		"allowJs": true,  // could include just ".js" files
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"strict": true, // means we can't have any implicit values (eg- if we remove the type we get error)
+		"forceConsistentCasingInFileNames": true,
+		"noFallthroughCasesInSwitch": true,
+		"module": "esnext",
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"jsx": "react-jsx"
+	},
+	"include": ["src"]
+}
 ```
